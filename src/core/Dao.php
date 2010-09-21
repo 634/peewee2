@@ -13,18 +13,18 @@ class Dao{
 
 	protected function __construct($pdo, $tableName){
 		if(empty($pdo)){
-			throw new Exception("Ú‘±‚ª‰Šú‰»‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+			throw new Exception("æŽ¥ç¶šãŒåˆæœŸåŒ–ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
 		}
 
 		if(empty($tableName)){
-			throw new Exception("ƒe[ƒuƒ‹–¼‚ªŽw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+			throw new Exception("ãƒ†ãƒ¼ãƒ–ãƒ«åãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
 		}
 
 		$this->pdo = $pdo;
 		$this->tableName = $tableName;
 
-		// ƒe[ƒuƒ‹’è‹`‚ÌŽæ“¾
-		// TODO ƒLƒƒƒbƒVƒ…
+		// ãƒ†ãƒ¼ãƒ–ãƒ«å®šç¾©ã®å–å¾—
+		// TODO ã‚­ãƒ£ãƒƒã‚·ãƒ¥
 		$sql = "DESC {$this->tableName}";
 		$stmt = $this->executeQuery($sql);
 
@@ -60,10 +60,10 @@ class Dao{
 
 	public function getCount($conditions=array()){
 		if(!$this->pdoReady()){
-			throw new Exception("Ú‘±‚ª‰Šú‰»‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+			throw new Exception("æŽ¥ç¶šãŒåˆæœŸåŒ–ã•ã‚Œã¦ã„ã¾ã›ã‚“");
 		}
 		if(empty($this->tableName)){
-			throw new Exception("ƒe[ƒuƒ‹–¼‚ðŽw’è‚µ‚Ä‚­‚¾‚³‚¢");
+			throw new Exception("ãƒ†ãƒ¼ãƒ–ãƒ«åã‚’æŒ‡å®šã—ã¦ãã ã•ã„");
 		}
 
 		if($conditions == null){
@@ -99,10 +99,10 @@ class Dao{
 
 	public function search($conditions=array(), $page=array(), $relations=array()){
 		if(!$this->pdoReady()){
-			throw new Exception("Ú‘±‚ª‰Šú‰»‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+			throw new Exception("æŽ¥ç¶šãŒåˆæœŸåŒ–ã•ã‚Œã¦ã„ã¾ã›ã‚“");
 		}
 		if(empty($this->tableName)){
-			throw new Exception("ƒe[ƒuƒ‹–¼‚ðŽw’è‚µ‚Ä‚­‚¾‚³‚¢");
+			throw new Exception("ãƒ†ãƒ¼ãƒ–ãƒ«åã‚’æŒ‡å®šã—ã¦ãã ã•ã„");
 		}
 
 		if($conditions == null){
@@ -183,16 +183,16 @@ class Dao{
 	public function find($id){
 
 		if(!$this->pdoReady()){
-			throw new PeeweeException("Ú‘±‚ª‰Šú‰»‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+			throw new PeeweeException("æŽ¥ç¶šãŒåˆæœŸåŒ–ã•ã‚Œã¦ã„ã¾ã›ã‚“");
 		}
 		if(empty($this->tableName)){
-			throw new PeeweeException("ƒe[ƒuƒ‹–¼‚ðŽw’è‚µ‚Ä‚­‚¾‚³‚¢");
+			throw new PeeweeException("ãƒ†ãƒ¼ãƒ–ãƒ«åã‚’æŒ‡å®šã—ã¦ãã ã•ã„");
 		}
 		if(empty($id)){
-			throw new PeeweeException("ID‚ªŽw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+			throw new PeeweeException("IDãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“");
 		}
 		if(!is_numeric($id)){
-			throw new PeeweeException("ID‚ª•s³‚Å‚·B", $id);
+			throw new PeeweeException("IDãŒä¸æ­£ã§ã™ã€‚", $id);
 		}
 
 		$sql = "select * from " . $this->tableName . " where id = :ID";
@@ -291,9 +291,7 @@ class Dao{
 			}
 		}
 
-		print $sql;
-
-		$result = $stmt->execute();
+		$result = $this->executeStatement($stmt);
 
 		return $result;
 
@@ -347,7 +345,7 @@ class Dao{
 			if($parameterValue == null){
 				$stmt->bindValue(":".$parameterKey, $parameterValue, PDO::PARAM_NULL);
 			}
-			
+
 			$type = $this->getColumnType($parameterKey);
 			switch ($type) {
 				case Dao::TYPE_INT:
@@ -388,33 +386,102 @@ class Dao{
 		}
 
 		$result = $this->executeStatement($stmt);
-				
+
 		return $result;
+	}
+
+	public function delete(Dto $dto){
+		$sql = " delete from ";
+		$sql .= $this->tableName;
+
+		$parameters = $dto->getParameters();
+		$index = 0;
+		foreach($parameters as $parameterKey=>$parameterValue){
+			if($this->isPrimaryKey($parameterKey)){
+				if($index == 0){
+					$sql .= " where ";
+				}else{
+					$sql .= " and ";
+				}
+
+				$sql .= $parameterKey . "=:" . $parameterKey;
+				$index++;
+					
+			}
+		}
+
+		$stmt = $this->pdo->prepare($sql);
+
+		// bind
+		$index = 0;
+		foreach($parameters as $parameterKey=>$parameterValue){
+			if($this->isPrimaryKey($parameterKey)){
+					
+				$type = $this->getColumnType($parameterKey);
+				switch ($type) {
+					case Dao::TYPE_INT:
+						$stmt->bindValue(":".$parameterKey, $parameterValue, PDO::PARAM_INT);
+						break;
+
+					case Dao::TYPE_DATETIME:
+						if(getType($parameterValue) == "integer"){
+							$dateTimeStr = date('Y-m-d H:i:s', $parameterValue);
+						}
+
+						if(!$dateTimeStr || empty($dateTimeStr)){
+							$dateTimeStr = $parameterValue;
+						}
+
+						$stmt->bindValue(":".$parameterKey, $dateTimeStr, PDO::PARAM_STR);
+						break;
+
+					case Dao::TYPE_DATE:
+						if(getType($parameterValue) == "integer"){
+							$dateTimeStr = date('Y-m-d', $parameterValue);
+						}
+
+						if(!$dateTimeStr || empty($dateTimeStr)){
+							$dateTimeStr = $parameterValue;
+						}
+
+						$stmt->bindValue(":".$parameterKey, $dateTimeStr, PDO::PARAM_STR);
+						break;
+
+					default:
+						$stmt->bindValue(":".$parameterKey, $parameterValue, PDO::PARAM_STR);
+				}
+			}
+		}
+
+		$result = $this->executeStatement($stmt);
+
+		return $result;
+
 	}
 
 	private function executeQuery($sql){
 		$stmt = $this->pdo->query($sql);
-		
+
 		if($this->pdo->errorCode() != "00000"){
 			throw new PeeweeException(null, $this->pdo->errorInfo());
 		}
-		
+
 		return $stmt;
 	}
-	
+
 	private function executeStatement($stmt){
 		$result = $stmt->execute();
-		
+
 		if($stmt->errorCode() != "00000"){
 			throw new PeeweeException(null, $stmt->errorInfo());
 		}
-		
+
 		return $result;
 	}
-	
+
 	public function truncate(){
 		$sql = "truncate table {$this->tableName}";
-		$this->pdo->exec($sql);
+		$this->executeQuery($sql);
 	}
 
 	private function isPrimaryKey($columnName){
@@ -468,21 +535,21 @@ class Dao{
 				if($value === null){
 					return null;
 				}
-				
+
 				return (int)$value;
 
 			case Dao::TYPE_DATETIME:
 				if($value === null){
 					return null;
 				}
-				
+
 				return strtotime($value);
 
 			case Dao::TYPE_DATE:
 				if($value === null){
 					return null;
 				}
-				
+
 				return strtotime($value);
 					
 			default:

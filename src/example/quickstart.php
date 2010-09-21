@@ -5,8 +5,11 @@ require_once "../core/Peewee.php";
 $peewee = Peewee::create(array("host"=>"localhost", "database"=>"peewee", "user"=>"root", "password"=>"", "character-set"=>"utf8"));
 
 $empDao = $peewee->createDao("emp");
-$empDao->truncate();
-
+try{
+	$empDao->truncate();
+}catch(PeeweeException $e){
+	print_r($e);
+}
 
 // insert
 $dto = $empDao->createDto();
@@ -88,6 +91,20 @@ for($i = 0; $i < 10; $i++){
 	print "<hr>";
 }
 
+// delete
+$deleteKeys = array(3, 9, 11);
+foreach($deleteKeys as $deleteKey){
+	$dto = $empDao->find($deleteKey);
+	try{
+		$result = $empDao->delete($dto);
+	}catch(PeeweeException $e){
+		print_r($e);
+	}
+	print_r($result);
+	print "<hr>";
+	print_r($dto);
+	print "<hr>";
+}
 
 // find and update
 $dto = $empDao->find(5);
@@ -106,7 +123,12 @@ print "<hr>";
 
 // table dept
 $deptDao = $peewee->createDao("dept");
-$deptDao->truncate();
+try{
+	$deptDao->truncate();
+}catch(PeeweeException $e){
+	print_r($e);
+}
+
 $dto = $deptDao->createDto();
 $dto->id = 10001;
 $dto->name = "dept1";
